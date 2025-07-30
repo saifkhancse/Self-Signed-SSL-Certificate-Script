@@ -35,14 +35,14 @@ This script was created as part of a security mini-project for a university cour
 ---
 
 ## 📂 Folder Structure (after script runs)
-
+ <pre>
 ~/tls_project/
 ├── ca/
 │   ├── root-ca/         # AcmeRootCA private keys, certs
 │   ├── sub-ca/          # AcmeCA private keys, certs
 │   └── server/          # www.verysecureserver.com certs
 └── /opt/lampp/htdocs/   # XAMPP public web root (with upload form)
-
+ </pre>
 ---
 
 ## 🛠️ Prerequisites
@@ -56,19 +56,11 @@ This script was created as part of a security mini-project for a university cour
 
 ## 🚀 How to Run
 
-1️⃣ Clone the Repository:
-    git clone https://github.com/saifkhancse/Self-Signed-SSL-Certificate-Script.git
-    cd Self-Signed-SSL-Certificate-Script
-
-2️⃣ Make the Script Executable:
-    chmod +x Self-Signed-SSL-Certificate-Script.sh
-
-3️⃣ Run the Script with Root Privileges:
-    sudo ./Self-Signed-SSL-Certificate-Script.sh
-
-4️⃣ Follow Prompts:
-    - Your domain (e.g., www.verysecureserver.com)
-    - Organization, country, city, email (used in certificate subject)
+<pre> 
+wget https://raw.githubusercontent.com/saifkhancse/Self-Signed-SSL-Certificate-Script/main/Self-Signed-SSL-Certificate-Script.sh -O tls-setup.sh
+chmod +x tls-setup.sh
+sudo ./tls-setup.sh
+ </pre>
 
 ---
 
