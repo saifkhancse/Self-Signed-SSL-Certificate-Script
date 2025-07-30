@@ -1,8 +1,4 @@
 #!/bin/bash
-# Run with: sudo bash Self-Signed-SSL-Certificate-Script.sh
-# Fully automated and robust TLS CA setup script with no interactive input
-# Fixed key/cert mismatch, cleanup, error checking, and passphrase removal for server key
-# Adapted to use XAMPP instead of system apache2
 
 set -euo pipefail
 IFS=$'\n\t'
@@ -12,7 +8,25 @@ exec > >(tee -a "$LOGFILE") 2>&1
 
 echo "=== Starting TLS CA Setup === $(date)"
 
-# Prompt for input
+
+read -rp "Enter domain name [www.verysecureserver.com]: " DOMAIN
+DOMAIN=${DOMAIN:-www.verysecureserver.com}
+
+read -rp "Enter organization name [Acme]: " ORG
+ORG=${ORG:-Acme}
+
+read -rp "Enter country code [BD]: " COUNTRY
+COUNTRY=${COUNTRY:-BD}
+
+read -rp "Enter state/province [Dhaka]: " STATE
+STATE=${STATE:-Dhaka}
+
+read -rp "Enter city/locality [Dhaka]: " CITY
+CITY=${CITY:-Dhaka}
+
+read -rp "Enter email address [admin@verysecureserver.com]: " EMAIL
+EMAIL=${EMAIL:-admin@verysecureserver.com}
+
 read -rp "Enter domain name (e.g., www.verysecureserver.com): " DOMAIN
 read -rp "Enter organization name (e.g., Acme Corp): " ORG
 read -rp "Enter country code (2 letters, e.g., BD): " COUNTRY
@@ -20,23 +34,6 @@ read -rp "Enter state/province (e.g., Dhaka): " STATE
 read -rp "Enter city/locality (e.g., Dhaka): " CITY
 read -rp "Enter email address: " EMAIL
 
-# read -rp "Enter domain name [www.verysecureserver.com]: " DOMAIN
-# DOMAIN=${DOMAIN:-www.verysecureserver.com}
-
-# read -rp "Enter organization name [Acme]: " ORG
-# ORG=${ORG:-Acme}
-
-# read -rp "Enter country code [BD]: " COUNTRY
-# COUNTRY=${COUNTRY:-BD}
-
-# read -rp "Enter state/province [Dhaka]: " STATE
-# STATE=${STATE:-Dhaka}
-
-# read -rp "Enter city/locality [Dhaka]: " CITY
-# CITY=${CITY:-Dhaka}
-
-# read -rp "Enter email address [admin@verysecureserver.com]: " EMAIL
-# EMAIL=${EMAIL:-admin@verysecureserver.com}
 
 
 WORKDIR="${HOME}/tls_project"
@@ -78,24 +75,33 @@ echo "Lock released. Proceeding with package update and installation..."
 DEBIAN_FRONTEND=noninteractive apt-get update -y
 DEBIAN_FRONTEND=noninteractive apt-get install -y openssl ufw bind9 dnsutils net-tools php wget libnss3-tools
 
-echo "Checking for XAMPP..."
+echo "🔍 Checking for XAMPP..."
+
+XAMPP_VERSION="8.2.12"
+INSTALLER_NAME="xampp-linux-x64-${XAMPP_VERSION}-0-installer.run"
+XAMPP_INSTALLER="/tmp/$INSTALLER_NAME"
+PRIMARY_URL="https://www.apachefriends.org/xampp-files/${XAMPP_VERSION}/$INSTALLER_NAME"
+FALLBACK_URL="https://downloads.sourceforge.net/project/xampp/XAMPP%20Linux/${XAMPP_VERSION}/$INSTALLER_NAME"
 
 if [ ! -d /opt/lampp ]; then
-    echo "XAMPP not found. Downloading and installing..."
+    echo "⚠️  XAMPP not found. Attempting to download and install..."
 
-    XAMPP_INSTALLER="/tmp/xampp-installer.run"
-    XAMPP_URL="https://www.apachefriends.org/xampp-files/8.2.12/xampp-linux-x64-8.2.12-0-installer.run"
-
-    echo "Downloading XAMPP from: $XAMPP_URL"
-    wget -O "$XAMPP_INSTALLER" "$XAMPP_URL"
+    echo "➡️  Trying primary URL: $PRIMARY_URL"
+    wget -O "$XAMPP_INSTALLER" "$PRIMARY_URL" || {
+        echo "❌ Primary URL failed. Trying fallback from SourceForge..."
+        wget -O "$XAMPP_INSTALLER" "$FALLBACK_URL" || {
+            echo "❌ ERROR: Could not download XAMPP installer from either source."
+            exit 1
+        }
+    }
 
     chmod +x "$XAMPP_INSTALLER"
 
-    echo "Running XAMPP installer silently..."
+    echo "🛠  Running XAMPP installer silently..."
     "$XAMPP_INSTALLER" --mode unattended
 
     if [ -d /opt/lampp ]; then
-        echo "XAMPP installed successfully."
+        echo "✅ XAMPP installed successfully."
     else
         echo "❌ ERROR: XAMPP installation failed."
         exit 1
@@ -104,12 +110,14 @@ else
     echo "✅ XAMPP already installed at /opt/lampp"
 fi
 
+# Start XAMPP if not already running
 if ! pgrep -f lampp >/dev/null; then
-    echo "Starting XAMPP..."
+    echo "🚀 Starting XAMPP..."
     /opt/lampp/lampp start
 else
-    echo "XAMPP is already running."
+    echo "✅ XAMPP is already running."
 fi
+
 
 
 echo "Configuring UFW firewall rules..."
