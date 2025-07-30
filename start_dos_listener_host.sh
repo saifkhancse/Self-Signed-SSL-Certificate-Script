@@ -9,4 +9,4 @@ echo 'alert tcp any any -> $HOME_NET 443 (msg:"Possible DoS Attack on HTTPS"; fl
 read -rp "Press Enter to continue..."
 
 echo "🚀 Running Snort with live alerts..."
-snort -A console -q -c "$SNORT_CONF" -i "$INTERFACE"
+sudo snort -A console -q -c "$SNORT_CONF" -i "$INTERFACE"
