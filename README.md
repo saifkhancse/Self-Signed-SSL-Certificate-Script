@@ -1,3 +1,4 @@
+
 # 🔐 Self-Signed SSL Certificate Automation Script
 
 This project provides a **fully automated Bash script** to create a complete **TLS Certificate Authority (CA) hierarchy** with:
@@ -35,14 +36,15 @@ This script was created as part of a security mini-project for a university cour
 ---
 
 ## 📂 Folder Structure (after script runs)
- <pre>
+<pre>
 ~/tls_project/
 ├── ca/
 │   ├── root-ca/         # AcmeRootCA private keys, certs
 │   ├── sub-ca/          # AcmeCA private keys, certs
 │   └── server/          # www.verysecureserver.com certs
 └── /opt/lampp/htdocs/   # XAMPP public web root (with upload form)
- </pre>
+</pre>
+
 ---
 
 ## 🛠️ Prerequisites
@@ -51,10 +53,11 @@ This script was created as part of a security mini-project for a university cour
 - Sudo/root privileges
 - Internet connection (to install packages & XAMPP)
 - Optional: Firefox (for CA trust import)
+
 ---
 
 ## 🚀 How to Run
-<pre> 
+<pre>
 sudo -i
 wget https://raw.githubusercontent.com/saifkhancse/Self-Signed-SSL-Certificate-Script/main/Self-Signed-SSL-Certificate-Script.sh -O tls-setup.sh
 chmod +x tls-setup.sh
@@ -62,6 +65,10 @@ sudo ./tls-setup.sh
 </pre>
 - Input the required information. Leave blank if not needed. It will put default values instead.
 - If script fails after installing xampp, just rerun the script. No need to download the script again! 
+- If already run script succssfully, just start the xampp server
+<pre>
+sudo /opt/lampp/manager-linux-x64.run
+</pre>
 ---
 
 ## 🔍 Verification
@@ -79,10 +86,86 @@ sudo ./tls-setup.sh
 
 ## 📁 Files of Interest
 
-Self-Signed-SSL-Certificate-Script.sh   -> Main Bash script (automated setup)
-upload.php (created dynamically)         -> Secure file upload form
-/etc/bind/                               -> BIND DNS zone and config files
-/opt/lampp/htdocs/                       -> Public files served by XAMPP
+Self-Signed-SSL-Certificate-Script.sh   -> Main Bash script (automated setup)  
+upload.php (created dynamically)         -> Secure file upload form  
+/etc/bind/                               -> BIND DNS zone and config files  
+/opt/lampp/htdocs/                       -> Public files served by XAMPP  
+
+---
+
+
+## 📁 Additional Automation Scripts
+
+This project includes several **additional automation scripts** for security testing and certificate management.
+
+---
+
+### 🛡️ Intrusion Detection System (IDS) Setup
+**Script:** `setup_ids_snort.sh`
+
+📥 **Download & Run:**
+```bash
+sudo -i
+wget https://raw.githubusercontent.com/saifkhancse/Self-Signed-SSL-Certificate-Script/main/setup_ids_snort.sh -O setup_ids_snort.sh
+chmod +x setup_ids_snort.sh
+sudo ./setup_ids_snort.sh
+```
+
+🔧 **What it does:**
+- Detects your system’s interface and IP
+- Installs Snort
+- Configures `$HOME_NET` in `snort.conf`
+- Adds a custom DoS detection rule
+- Starts Snort in background mode
+
+---
+
+### 📡 Start DoS Listener (Snort Live Monitoring)
+**Script:** `start_dos_listener_host.sh`
+
+📥 **Download & Run:**
+```bash
+sudo -i
+wget https://raw.githubusercontent.com/saifkhancse/Self-Signed-SSL-Certificate-Script/main/start_dos_listener_host.sh -O start_dos_listener_host.sh
+chmod +x start_dos_listener_host.sh
+sudo ./start_dos_listener_host.sh
+```
+
+🛠️ Displays real-time alerts from Snort for possible DoS attacks.
+
+---
+
+### 💣 DoS Attack Simulation (Attacker Side)
+**Script:** `attacker_dos_attack.sh`
+
+📥 **Download & Run:**
+```bash
+sudo -i
+wget https://raw.githubusercontent.com/saifkhancse/Self-Signed-SSL-Certificate-Script/main/attacker_dos_attack.sh -O attacker_dos_attack.sh
+chmod +x attacker_dos_attack.sh
+sudo ./attacker_dos_attack.sh
+```
+
+⚠️ Simulates SYN flood attack on port 443 using hping3.
+
+---
+
+### 🔒 Revoke Server Certificate
+**Script:** `revoke_server_cert.sh`
+
+📥 **Download & Run:**
+```bash
+sudo -i
+wget https://raw.githubusercontent.com/saifkhancse/Self-Signed-SSL-Certificate-Script/main/revoke_server_cert.sh -O revoke_server_cert.sh
+chmod +x revoke_server_cert.sh
+sudo ./revoke_server_cert.sh
+```
+
+🔧 **What it does:**
+- Revokes the existing server certificate using Sub CA
+- Regenerates CRL (certificate revocation list)
+- Publishes the CRL to XAMPP for OCSP-style checking
+
 
 ---
 
