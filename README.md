@@ -18,7 +18,7 @@ It also configures:
 
 This script was created as part of a security mini-project for a university course. The project involves building a secure web infrastructure with a custom certificate authority, private server certificates, DNS configuration, and HTTPS hosting.
 
-> ✅ This project aligns with the requirements outlined in GENIBARTA tutorial videos and EWU’s course deliverables.
+> ✅ This project aligns with the requirements outlined in EWU’s course deliverables.
 
 ---
 
@@ -97,14 +97,6 @@ For course submission:
     - Your VM setup
     - How the TLS chain was built
     - Secure server working with certificate padlock
-
----
-
-## 📹 Reference Videos
-
-- GENIBARTA Part 1
-- GENIBARTA Part 2
-- GENIBARTA Part 3
 
 ---
 
