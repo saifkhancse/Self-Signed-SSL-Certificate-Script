@@ -51,7 +51,6 @@ This script was created as part of a security mini-project for a university cour
 - Sudo/root privileges
 - Internet connection (to install packages & XAMPP)
 - Optional: Firefox (for CA trust import)
-
 ---
 
 ## 🚀 How to Run
@@ -61,7 +60,8 @@ wget https://raw.githubusercontent.com/saifkhancse/Self-Signed-SSL-Certificate-S
 chmod +x tls-setup.sh
 sudo ./tls-setup.sh
 </pre>
-- Input the required information. Leave blank if not needed. It will put default values instead. 
+- Input the required information. Leave blank if not needed. It will put default values instead.
+- If script fails after installing xampp, just rerun the script. No need to download the script again! 
 ---
 
 ## 🔍 Verification
