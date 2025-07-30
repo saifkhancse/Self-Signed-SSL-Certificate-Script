@@ -23,6 +23,7 @@ sed -i "s/^ipvar HOME_NET .*/ipvar HOME_NET ${IPADDR}\/24/" "$SNORT_CONF"
 
 LOCAL_RULES="/etc/snort/rules/local.rules"
 DOS_RULE='alert tcp any any -> $HOME_NET 443 (msg:"Possible DoS Attack on HTTPS"; flags:S; threshold:type threshold, track by_src, count 70, seconds 10; sid:1000001; rev:1;)'
+
 if ! grep -q "$DOS_RULE" "$LOCAL_RULES"; then
   echo "➕ Adding custom DoS detection rule..."
   echo "$DOS_RULE" >> "$LOCAL_RULES"
