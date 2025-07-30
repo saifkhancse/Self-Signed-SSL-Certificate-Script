@@ -17,7 +17,7 @@ echo "🔁 Regenerating CRL..."
 openssl ca -config sub-ca.conf -gencrl -out crl.pem -passin pass:1111
 
 echo "📂 Copying updated CRL to web directory..."
-mkdir -p /opt/lampp/htdocs/crl
-cp crl.pem /opt/lampp/htdocs/crl/sub-crl.pem
+sudo mkdir -p /opt/lampp/htdocs/crl
+sudo cp crl.pem /opt/lampp/htdocs/crl/sub-crl.pem
 
 echo "✅ Server certificate revoked and CRL updated."
