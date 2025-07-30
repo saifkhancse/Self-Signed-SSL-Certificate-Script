@@ -1,5 +1,5 @@
 #!/bin/bash
-# Run with: sudo bash tls_ca_setup_localhost_v6.sh
+# Run with: sudo bash Self-Signed-SSL-Certificate-Script.sh
 # Fully automated and robust TLS CA setup script with no interactive input
 # Fixed key/cert mismatch, cleanup, error checking, and passphrase removal for server key
 # Adapted to use XAMPP instead of system apache2
