@@ -27,12 +27,6 @@ CITY=${CITY:-Dhaka}
 read -rp "Enter email address [admin@verysecureserver.com]: " EMAIL
 EMAIL=${EMAIL:-admin@verysecureserver.com}
 
-read -rp "Enter domain name (e.g., www.verysecureserver.com): " DOMAIN
-read -rp "Enter organization name (e.g., Acme Corp): " ORG
-read -rp "Enter country code (2 letters, e.g., BD): " COUNTRY
-read -rp "Enter state/province (e.g., Dhaka): " STATE
-read -rp "Enter city/locality (e.g., Dhaka): " CITY
-read -rp "Enter email address: " EMAIL
 
 
 
