@@ -56,6 +56,7 @@ This script was created as part of a security mini-project for a university cour
 
 ## 🚀 How to Run
 <pre> 
+sudo -i
 wget https://raw.githubusercontent.com/saifkhancse/Self-Signed-SSL-Certificate-Script/main/Self-Signed-SSL-Certificate-Script.sh -O tls-setup.sh
 chmod +x tls-setup.sh
 sudo ./tls-setup.sh
