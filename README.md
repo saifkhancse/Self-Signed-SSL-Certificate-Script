@@ -55,17 +55,15 @@ This script was created as part of a security mini-project for a university cour
 ---
 
 ## 🚀 How to Run
-
 <pre> 
 wget https://raw.githubusercontent.com/saifkhancse/Self-Signed-SSL-Certificate-Script/main/Self-Signed-SSL-Certificate-Script.sh -O tls-setup.sh
 chmod +x tls-setup.sh
 sudo ./tls-setup.sh
- </pre>
-
+</pre>
+- Input the required information. Leave blank if not needed. It will put default values instead. 
 ---
 
 ## 🔍 Verification
-
 - Open Firefox and visit: https://www.verysecureserver.com
   ✅ You should see a green padlock (trusted connection).
 
