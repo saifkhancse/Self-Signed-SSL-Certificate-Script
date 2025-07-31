@@ -457,18 +457,30 @@ cp "$WORKDIR/ca/sub-ca/certs/sub-ca.crt" "$WORKDIR/ca/sub-ca/certs/sub-ca.pem"
 cp "$WORKDIR/ca/server/certs/server.crt" "$WORKDIR/ca/server/certs/server.pem"
 cp "$WORKDIR/ca/server/certs/chained.crt" "$WORKDIR/ca/server/certs/chained.pem"
 cp "$WORKDIR/ca/server/private/server.key" "$WORKDIR/ca/server/private/server.key.pem"
+# Determine real non-root user running the script
+if [ "$EUID" -eq 0 ]; then
+    # Script is run as root, detect the original user
+    REAL_USER=$(logname 2>/dev/null || echo "$SUDO_USER")
+    USER_HOME=$(eval echo "~$REAL_USER")
+else
+    # Script is run by non-root user
+    REAL_USER=$(whoami)
+    USER_HOME="$HOME"
+fi
 
-USER_HOME="/home/ubuntu"
+# Set Downloads directory
 DOWNLOAD_DIR="$USER_HOME/Downloads"
 
-# Create Downloads dir if missing
+# Create Downloads directory if it doesn't exist
 mkdir -p "$DOWNLOAD_DIR"
 
-# Copy relevant certificates needed for Firefox import
+# Copy certificates for manual import
 cp "$WORKDIR/ca/root-ca/certs/ca.crt"        "$DOWNLOAD_DIR/RootCA.crt"
 cp "$WORKDIR/ca/sub-ca/certs/sub-ca.crt"     "$DOWNLOAD_DIR/SubCA.crt"
 cp "$WORKDIR/ca/server/certs/server.crt"     "$DOWNLOAD_DIR/ServerCert.crt"
-chown ubuntu:ubuntu "$DOWNLOAD_DIR"/*.crt
+
+# Set ownership so user can access them
+chown "$REAL_USER:$REAL_USER" "$DOWNLOAD_DIR"/*.crt
 
 echo ""
 echo "📢 Certificates to import manually in Firefox (via File Browser):"
@@ -486,18 +498,6 @@ echo ""
 echo "📦 Full cert chain (for servers or nginx config, not Firefox import):"
 echo "   • $WORKDIR/ca/server/certs/chained.pem"
 
-
-# Detect real non-root user running script or fallback to 'ubuntu' user
-if [ "$EUID" -eq 0 ]; then
-    # Running as root, try to find the original user's home
-    REAL_USER=$(logname 2>/dev/null || echo ubuntu)
-    USER_HOME=$(eval echo "~$REAL_USER")
-else
-    # Running as non-root
-    REAL_USER=$(whoami)
-    USER_HOME="$HOME"
-fi
-#!/bin/bash
 
 # Define working directory and domain (adjust as needed)
 WORKDIR="/root/tls_project"
