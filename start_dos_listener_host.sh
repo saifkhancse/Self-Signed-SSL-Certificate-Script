@@ -34,7 +34,7 @@ sudo snort -A console -q -c "$SNORT_CONF" -i "$INTERFACE" > "$TEMP_ALERTS" &
 echo "🛡️ Monitoring for attacks and blocking malicious IPs..."
 tail -n0 -F "$TEMP_ALERTS" | while read -r line; do
   if echo "$line" | grep -q "DoS flood on HTTPS port"; then
-    ATTACKER_IP=$(echo "$line" | grep -oP '(?<=\[**\] )\d{1,3}(\.\d{1,3}){3}' | head -n1)
+   ATTACKER_IP=$(echo "$line" | grep -oP '(?<=\[\*\*\] )\d{1,3}(\.\d{1,3}){3}' | head -n1)
     if [ -n "$ATTACKER_IP" ] && ! grep -q "$ATTACKER_IP" "$BLOCKED_LOG"; then
       echo "🚫 Blocking IP: $ATTACKER_IP"
       sudo iptables -A INPUT -s "$ATTACKER_IP" -j DROP
