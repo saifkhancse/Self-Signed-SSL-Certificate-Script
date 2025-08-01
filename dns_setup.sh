@@ -18,8 +18,6 @@ MODE=$1
 # Common defaults
 DEFAULT_DOMAIN="verysecureserver.com"
 DEFAULT_HOSTNAME=$(hostname)
-
-# Auto-detect IP/CIDR and gateway
 DEFAULT_IP_CIDR=$(ip -o -f inet addr show | awk '/scope global/ {print $4; exit}')
 DEFAULT_IP=${DEFAULT_IP_CIDR%/*}
 DEFAULT_NETMASK=${DEFAULT_IP_CIDR#*/}
@@ -27,7 +25,7 @@ DEFAULT_GATEWAY=$(ip route | awk '/default/ {print $3; exit}')
 
 if [ "$MODE" == "server" ]; then
   echo "=========================="
-  echo " BIND DNS Setup Script"
+  echo " BIND DNS Server Setup"
   echo "=========================="
 
   read -rp "Enter domain name [${DEFAULT_DOMAIN}]: " DOMAIN
@@ -39,148 +37,128 @@ if [ "$MODE" == "server" ]; then
   GATEWAY=$DEFAULT_GATEWAY
   FQDN="${HOSTNAME}.${DOMAIN}"
 
-  echo
   echo "🔧 Domain: $DOMAIN"
   echo "🖥 Hostname: $HOSTNAME"
   echo "🌐 FQDN: $FQDN"
-  echo "🌍 IPv4 Address: $IP/$NETMASK"
-  echo "🚪 Default Gateway: $GATEWAY"
-  echo
+  echo "🌍 IP: $IP/$NETMASK"
+  echo "🚪 Gateway: $GATEWAY"
 
   HOSTS_FILE="/etc/hosts"
   BIND_DIR="/etc/bind"
   FORWARD_ZONE_FILE="$BIND_DIR/db.$DOMAIN"
   REVERSE_ZONE_FILE="$BIND_DIR/db.${IP//./_}"
+  REVERSE_ZONE=$(echo $IP | awk -F. '{print $3"."$2"."$1}')
+  PTR_LAST_OCTET=$(echo $IP | awk -F. '{print $4}')
 
-  echo "🛠 Updating $HOSTS_FILE..."
-  sudo cp $HOSTS_FILE "${HOSTS_FILE}.bak_$(date +%F_%T)"
-  sudo sed -i "/\b$FQDN\b/d;/\bwww\.$DOMAIN\b/d" $HOSTS_FILE
-  echo -e "$IP\t$FQDN $HOSTNAME www.$DOMAIN" | sudo tee -a $HOSTS_FILE
-  tail -n 5 $HOSTS_FILE
+  echo "🛠 Updating /etc/hosts..."
+  sudo sed -i "/$FQDN/d" $HOSTS_FILE
+  echo "$IP $FQDN $HOSTNAME www.$DOMAIN" | sudo tee -a $HOSTS_FILE
 
-  NAMED_OPTIONS="$BIND_DIR/named.conf.options"
-  echo "🛠 Configuring $NAMED_OPTIONS..."
-  sudo cp $NAMED_OPTIONS "${NAMED_OPTIONS}.bak_$(date +%F_%T)"
-  sudo tee $NAMED_OPTIONS > /dev/null <<EOF
+  echo "🛠 Configuring named.conf.options..."
+  sudo tee $BIND_DIR/named.conf.options > /dev/null <<EOF
 options {
     directory "/var/cache/bind";
-    recursion yes;
+    recursion no;
     allow-query { any; };
     listen-on { any; };
-    forwarders { 8.8.8.8; 8.8.4.4; };
+    listen-on-v6 { any; };
     dnssec-validation auto;
     auth-nxdomain no;
-    listen-on-v6 { any; };
 };
 EOF
 
-  NAMED_LOCAL="$BIND_DIR/named.conf.local"
-  echo "🛠 Configuring $NAMED_LOCAL..."
-  sudo cp $NAMED_LOCAL "${NAMED_LOCAL}.bak_$(date +%F_%T)"
-  REVERSE_ZONE=$(echo $IP | awk -F. '{print $3"."$2"."$1}')
-  sudo tee $NAMED_LOCAL > /dev/null <<EOF
+  echo "🛠 Configuring named.conf.local..."
+  sudo tee $BIND_DIR/named.conf.local > /dev/null <<EOF
 zone "$DOMAIN" {
     type master;
     file "$FORWARD_ZONE_FILE";
+    allow-update { none; };
 };
 
 zone "${REVERSE_ZONE}.in-addr.arpa" {
     type master;
     file "$REVERSE_ZONE_FILE";
+    allow-update { none; };
 };
 EOF
 
-  echo "🛠 Creating forward zone file $FORWARD_ZONE_FILE..."
+  echo "🛠 Creating forward zone file..."
   SERIAL=$(date +%Y%m%d01)
   sudo tee $FORWARD_ZONE_FILE > /dev/null <<EOF
-\$TTL    604800
+\$TTL 604800
 @       IN      SOA     ns1.$DOMAIN. admin.$DOMAIN. (
-                              $SERIAL ; Serial
-                                  604800 ; Refresh
-                                   86400 ; Retry
-                                 2419200 ; Expire
-                                  604800 ; Negative Cache TTL
-)
+                        $SERIAL ; Serial
+                        604800 ; Refresh
+                        86400 ; Retry
+                        2419200 ; Expire
+                        604800 ) ; Negative Cache TTL
 ;
 @       IN      NS      ns1.$DOMAIN.
 ns1     IN      A       $IP
-$HOSTNAME    IN      A       $IP
+$HOSTNAME IN    A       $IP
 www     IN      A       $IP
 EOF
 
-  echo "🛠 Creating reverse zone file $REVERSE_ZONE_FILE..."
-  LAST_OCTET=$(echo $IP | awk -F. '{print $4}')
+  echo "🛠 Creating reverse zone file..."
   sudo tee $REVERSE_ZONE_FILE > /dev/null <<EOF
-\$TTL    604800
+\$TTL 604800
 @       IN      SOA     ns1.$DOMAIN. admin.$DOMAIN. (
-                              $SERIAL ; Serial
-                                  604800 ; Refresh
-                                   86400 ; Retry
-                                 2419200 ; Expire
-                                  604800 ; Negative Cache TTL
-)
+                        $SERIAL ; Serial
+                        604800 ; Refresh
+                        86400 ; Retry
+                        2419200 ; Expire
+                        604800 ) ; Negative Cache TTL
 ;
 @       IN      NS      ns1.$DOMAIN.
-$LAST_OCTET     IN      PTR     $FQDN.
+$PTR_LAST_OCTET IN      PTR     $FQDN.
 EOF
 
-  echo "🚀 Restarting bind9 service..."
+  echo "🚀 Restarting BIND9..."
   sudo systemctl restart bind9
   sleep 2
-  sudo systemctl status bind9 --no-pager | head -n 12
+  sudo systemctl status bind9 --no-pager | head -n 10
 
-  echo "🛠 Configuring /etc/resolv.conf..."
-  sudo cp /etc/resolv.conf "/etc/resolv.conf.bak_$(date +%F_%T)"
-  sudo tee /etc/resolv.conf > /dev/null <<EOF
-nameserver $IP
-search $DOMAIN
-EOF
-  cat /etc/resolv.conf
+  echo "🛠 Configuring /etc/resolv.conf with actual IP..."
+  sudo rm -f /etc/resolv.conf
+  echo -e "nameserver $IP\nsearch $DOMAIN" | sudo tee /etc/resolv.conf
 
-  if systemctl is-active --quiet systemd-resolved; then
-      echo "Flushing systemd-resolved DNS cache..."
-      sudo systemd-resolve --flush-caches
-      sudo systemctl restart systemd-resolved
-  fi
+  echo "🔄 Flushing DNS cache..."
+  sudo systemd-resolve --flush-caches || true
+  sudo systemctl restart systemd-resolved || true
 
-  echo "🔍 Testing DNS resolution..."
-  nslookup $HOSTNAME
-  nslookup www.$DOMAIN
-  ping -c3 www.$DOMAIN
+  echo "🔍 Testing authoritative DNS resolution..."
+  dig @$IP www.$DOMAIN +short
+  dig @$IP www.$DOMAIN
 
-  echo "✅ Server setup completed."
+  echo "✅ Server DNS setup complete."
 
 elif [ "$MODE" == "client" ]; then
-  echo "==============================="
-  echo " Client DNS Configuration Script"
-  echo "==============================="
+  echo "==========================="
+  echo " DNS Client Configuration"
+  echo "==========================="
 
-  read -rp "Enter BIND DNS server IP [${DEFAULT_IP}]: " BIND_DNS_IP
-  BIND_DNS_IP=${BIND_DNS_IP:-$DEFAULT_IP}
+  read -rp "Enter DNS Server IP [${DEFAULT_IP}]: " DNS_IP
+  DNS_IP=${DNS_IP:-$DEFAULT_IP}
 
   read -rp "Enter search domain [${DEFAULT_DOMAIN}]: " DOMAIN
   DOMAIN=${DOMAIN:-$DEFAULT_DOMAIN}
 
-  echo "Disabling systemd-resolved..."
-  sudo systemctl disable systemd-resolved.service
-  sudo systemctl stop systemd-resolved.service
+  echo "🛠 Disabling systemd-resolved..."
+  sudo systemctl stop systemd-resolved
+  sudo systemctl disable systemd-resolved
 
-  if [ -L /etc/resolv.conf ]; then
-      sudo rm /etc/resolv.conf
-  fi
+  [ -L /etc/resolv.conf ] && sudo rm /etc/resolv.conf
 
-  echo "Creating /etc/resolv.conf..."
-  sudo tee /etc/resolv.conf > /dev/null <<EOF
-nameserver $BIND_DNS_IP
-search $DOMAIN
-EOF
-  cat /etc/resolv.conf
+  echo -e "nameserver $DNS_IP\nsearch $DOMAIN" | sudo tee /etc/resolv.conf
 
-  echo "🔍 Testing DNS resolution..."
-  nslookup www.$DOMAIN
+  echo "🔄 Flushing DNS cache..."
+  sudo systemd-resolve --flush-caches || true
+
+  echo "🔍 Testing client DNS resolution..."
+  dig www.$DOMAIN +short
   ping -c3 www.$DOMAIN
 
-  echo "✅ Client DNS configuration completed."
+  echo "✅ Client DNS setup complete."
 
 else
   usage
