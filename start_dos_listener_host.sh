@@ -40,7 +40,7 @@ tail -n0 -F "$TEMP_ALERTS" | while read -r line; do
     if [ -n "$ATTACKER_IP" ] && ! grep -qw "$ATTACKER_IP" "$BLOCKED_LOG"; then
       TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
       REASON="DoS flood on HTTPS port detected"
-      echo "🚫 Blocking IP: $ATTACKER_IP"
+      echo "🚫 Blocking IP: $ATTACKER_IP (logged in $BLOCKED_LOG)"
       sudo iptables -A INPUT -s "$ATTACKER_IP" -j DROP
       echo "$TIMESTAMP - $ATTACKER_IP - $REASON" | tee -a "$BLOCKED_LOG"
     fi
