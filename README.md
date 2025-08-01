@@ -57,12 +57,14 @@ This script was created as part of a security mini-project for a university cour
 ---
 
 ## 🚀 How to Run
-<pre>
+```bash
 sudo -i
 wget https://raw.githubusercontent.com/saifkhancse/Self-Signed-SSL-Certificate-Script/main/Self-Signed-SSL-Certificate-Script.sh -O tls-setup.sh
 chmod +x tls-setup.sh
 sudo ./tls-setup.sh
 </pre>
+```
+
 - Input the required information. Leave blank if not needed. It will put default values instead.
 - If script fails after installing xampp, just rerun the script. No need to download the script again! 
 - If already run script succssfully, just start the xampp server
@@ -99,6 +101,36 @@ upload.php (created dynamically)         -> Secure file upload form
 This project includes several **additional automation scripts** for security testing and certificate management.
 
 ---
+
+### 🌐 DNS Server + Client Setup  
+**Script:** `dns_setup.sh`  
+📁 GitHub: [dns_setup.sh](https://github.com/saifkhancse/Self-Signed-SSL-Certificate-Script/blob/main/dns_setup.sh)
+
+📥 **Download & Run:**
+```bash
+sudo -i
+wget https://raw.githubusercontent.com/saifkhancse/Self-Signed-SSL-Certificate-Script/main/dns_setup.sh -O dns_setup.sh
+chmod +x dns_setup.sh
+./dns_setup.sh server   # For DNS server setup
+./dns_setup.sh client   # For client DNS configuration
+```
+
+🔧 **What it does:**
+- Prompts for domain, hostname, IP, and gateway
+- Sets up **BIND9 DNS server** with forward and reverse zone files
+- Configures `/etc/hosts` and `/etc/resolv.conf`
+- Updates `named.conf.options` and `named.conf.local`
+- Automatically restarts BIND and verifies DNS resolution
+- Client mode disables `systemd-resolved` and configures DNS to point to the server
+
+🧪 **Verifies with:**
+- `nslookup` for hostname and domain
+- `ping` to test DNS resolution
+- Ensures browser or tools can resolve names via your DNS server
+
+---
+
+
 
 ### 🛡️ Intrusion Detection System (IDS) Setup
 **Script:** `setup_ids_snort.sh`
