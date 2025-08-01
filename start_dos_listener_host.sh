@@ -19,6 +19,7 @@ fi
 
 # Ensure log file exists
 touch "$BLOCKED_LOG"
+> "$TEMP_ALERTS"  # clear temp alerts log
 
 # Kill any running Snort instance
 sudo pkill -f snort || true
@@ -26,19 +27,18 @@ sudo pkill -f snort || true
 echo "🧪 Testing Snort configuration..."
 sudo snort -T -i "$INTERFACE" -c "$SNORT_CONF" || { echo "❌ Snort test failed!"; exit 1; }
 
-# Launch snort and capture alerts
 echo "🚀 Starting Snort with live alerts..."
-sudo snort -A console -q -c "$SNORT_CONF" -i "$INTERFACE" > "$TEMP_ALERTS" &
+# Capture both stdout and stderr to temp alerts log
+sudo snort -A console -q -c "$SNORT_CONF" -i "$INTERFACE" > "$TEMP_ALERTS" 2>&1 &
 
-# Monitor alerts and auto-block IPs
 echo "🛡️ Monitoring for attacks and blocking malicious IPs..."
 tail -n0 -F "$TEMP_ALERTS" | while read -r line; do
   if echo "$line" | grep -q "DoS flood on HTTPS port"; then
-   ATTACKER_IP=$(echo "$line" | grep -oP '(?<=\[\*\*\] )\d{1,3}(\.\d{1,3}){3}' | head -n1)
-    if [ -n "$ATTACKER_IP" ] && ! grep -q "$ATTACKER_IP" "$BLOCKED_LOG"; then
+    ATTACKER_IP=$(echo "$line" | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -n1)
+    if [ -n "$ATTACKER_IP" ] && ! grep -qw "$ATTACKER_IP" "$BLOCKED_LOG"; then
       echo "🚫 Blocking IP: $ATTACKER_IP"
       sudo iptables -A INPUT -s "$ATTACKER_IP" -j DROP
-      echo "$ATTACKER_IP" >> "$BLOCKED_LOG"
+      echo "$ATTACKER_IP" | tee -a "$BLOCKED_LOG"
     fi
   fi
 done
