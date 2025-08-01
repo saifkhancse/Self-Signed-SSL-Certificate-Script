@@ -4,7 +4,7 @@ echo "📡 Starting Snort to monitor potential DoS attacks..."
 INTERFACE=$(ip -o link show | awk -F': ' '!/lo/ {print $2; exit}')
 SNORT_CONF="/etc/snort/snort.conf"
 RULE_FILE="/etc/snort/rules/local.rules"
-USER_HOME="/home/$(logname)"
+USER_HOME="/home/${SUDO_USER:-$(logname)}"
 BLOCKED_LOG="$USER_HOME/Downloads/blocked_ips.txt"
 TEMP_ALERTS="/tmp/snort_alerts.log"
 UPDATED_RULE='alert tcp any any -> $HOME_NET 443 (msg:"DoS flood on HTTPS port"; flags:S; threshold:type threshold, track by_dst, count 100, seconds 5; sid:1000002; rev:1;)'
