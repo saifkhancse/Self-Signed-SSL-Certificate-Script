@@ -98,7 +98,10 @@ upload.php (created dynamically)         -> Secure file upload form
 ## 📁 Additional Automation Scripts
 
 This project includes several **additional automation scripts** for security testing and certificate management.
-
+- Before running the scripts install dos2unix
+```bash
+sudo apt pip dos2unix
+```
 ---
 ### 🌐 DNS Server + Client Setup  
 
@@ -107,6 +110,7 @@ This project includes several **additional automation scripts** for security tes
 sudo -i
 wget https://raw.githubusercontent.com/saifkhancse/Self-Signed-SSL-Certificate-Script/main/dns_setup.sh -O dns_setup.sh
 chmod +x dns_setup.sh
+dos2unix dns_setup.sh
 ./dns_setup.sh server   # For DNS server setup
 ./dns_setup.sh client   # For client DNS configuration
 ```
@@ -167,6 +171,7 @@ sudo ./this_script.sh client
 sudo -i
 wget https://raw.githubusercontent.com/saifkhancse/Self-Signed-SSL-Certificate-Script/main/setup_ids_snort.sh -O setup_ids_snort.sh
 chmod +x setup_ids_snort.sh
+dos2unix setup_ids_snort.sh
 sudo ./setup_ids_snort.sh
 ```
 
@@ -187,6 +192,7 @@ sudo ./setup_ids_snort.sh
 sudo -i
 wget https://raw.githubusercontent.com/saifkhancse/Self-Signed-SSL-Certificate-Script/main/start_dos_listener_host.sh -O start_dos_listener_host.sh
 chmod +x start_dos_listener_host.sh
+dos2unix start_dos_listener_host.sh
 sudo ./start_dos_listener_host.sh
 ```
 
@@ -202,6 +208,7 @@ sudo ./start_dos_listener_host.sh
 sudo -i
 wget https://raw.githubusercontent.com/saifkhancse/Self-Signed-SSL-Certificate-Script/main/attacker_dos_attack.sh -O attacker_dos_attack.sh
 chmod +x attacker_dos_attack.sh
+dos2unix attacker_dos_attack.sh
 sudo ./attacker_dos_attack.sh
 ```
 
@@ -217,6 +224,7 @@ sudo ./attacker_dos_attack.sh
 sudo -i
 wget https://raw.githubusercontent.com/saifkhancse/Self-Signed-SSL-Certificate-Script/main/revoke_server_cert.sh -O revoke_server_cert.sh
 chmod +x revoke_server_cert.sh
+dos2unix revoke_server_cert.sh
 sudo ./revoke_server_cert.sh
 ```
 
