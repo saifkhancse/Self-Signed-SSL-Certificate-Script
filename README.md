@@ -100,10 +100,7 @@ upload.php (created dynamically)         -> Secure file upload form
 This project includes several **additional automation scripts** for security testing and certificate management.
 
 ---
-
 ### 🌐 DNS Server + Client Setup  
-**Script:** `dns_setup.sh`  
-📁 GitHub: [dns_setup.sh](https://github.com/saifkhancse/Self-Signed-SSL-Certificate-Script/blob/main/dns_setup.sh)
 
 📥 **Download & Run:**
 ```bash
@@ -113,6 +110,37 @@ chmod +x dns_setup.sh
 ./dns_setup.sh server   # For DNS server setup
 ./dns_setup.sh client   # For client DNS configuration
 ```
+
+---
+
+### 🚀 How to Use
+
+**On server machine, run:**
+```bash
+sudo ./this_script.sh server
+```
+
+**On client machine, run:**
+```bash
+sudo ./this_script.sh client
+```
+
+---
+
+### 🧩 This covers:
+
+**Server:**
+- Sets up `/etc/hosts`, BIND config files, forward/reverse zones
+- Restarts BIND
+- Sets local `/etc/resolv.conf` to `127.0.0.1`
+
+**Client:**
+- Disables `systemd-resolved` stub resolver
+- Removes `/etc/resolv.conf` symlink if any
+- Creates `/etc/resolv.conf` pointing directly to BIND server IP
+- Tests DNS resolution
+
+---
 
 🔧 **What it does:**
 - Prompts for domain, hostname, IP, and gateway
